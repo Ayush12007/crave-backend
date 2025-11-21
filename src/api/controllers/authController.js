@@ -1,22 +1,22 @@
 import jwt from 'jsonwebtoken';
 import User from '../../models/User.js';
 
+
 const generateToken = (res, userId) => {
   const token = jwt.sign({ id: userId }, process.env.JWT_SECRET, {
     expiresIn: '30d'
   });
   
-  // FIX: Use domain logic for cross-subdomain deployment (Render)
   const isProduction = process.env.NODE_ENV === 'production';
 
   res.cookie('jwt', token, {
     httpOnly: true,
     // CRUCIAL: Set to true in production for HTTPS
     secure: isProduction, 
-    // FIX: Set to 'none' to allow cross-site cookies, but requires 'secure: true'
-    sameSite: isProduction ? 'none' : 'strict', 
-    // FIX: If using Render/Vercel, setting domain helps token transmission.
-    domain: isProduction ? '.onrender.com' : 'localhost', 
+    // FIX: Must use 'None' for cross-domain (Vercel -> Render) deployment, but requires secure:true.
+    sameSite: 'None', 
+    // Domain should be left blank or set to the specific API domain for deployment if using Vercel/Render. 
+    // Leaving it blank often works best in these environments.
     maxAge: 30 * 24 * 60 * 60 * 1000
   });
 };
